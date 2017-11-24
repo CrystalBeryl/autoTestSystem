@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.beryl.mapper.FormMapper">
+
+    <resultMap id="formResultMap" type="com.beryl.model.Form">
+        <id property="id" column="id" />
+        <result property="projectId" column="project_id" />
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="attachment" column="attachment"/>
+        <result property="creator" column="creator"/>
+        <result property="assigner" column="assigner"/>
+        <result property="priority" column="priority"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="fixedTime" column="fixed_time"/>
+        <result property="refixTime" column="refix_time"/>
+        <result property="regressTime" column="regress_time"/>
+        <result property="closeTime" column="close_time"/>
+    </resultMap>
+    <resultMap id="int" type="java.lang.Integer">
+    </resultMap>
+    <resultMap id="string" type="java.lang.String">
+    </resultMap>
+    <resultMap id="hashMap" type="java.util.HashMap">
+    </resultMap>
+
+    <resultMap id="bugFormEditResultMap" type="hashMap">
+        <!--<constructor>
+            <idArg column="project_id" javaType="int"></idArg>
+        </constructor>-->
+            <id property="id" column="id" javaType="int" />
+            <result property="title" column="title"></result>
+            <result property="description" column="description"></result>
+            <result property="attachment" column="attachment"></result>
+            <result property="priority" column="priority"></result>
+            <result property="assigner" column="assigner"></result>
+            <result property="status" column="status"></result>
+        <association property="project" javaType="hashMap" >
+            <id property="id" column="project_id"></id>
+            <result property="alias" column="alias"></result>
+        </association>
+    </resultMap>
+
+    <insert id="createBugForm"  useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="com.beryl.model.Form">
+        INSERT into form(project_id,title, description, attachment, creator, assigner, priority, create_time )
+        VALUES (#{projectId},#{title}, #{description}, #{attachment}, #{creator}, #{assigner}, #{priority}, #{createTime});
+</insert>
+
+    <update id="fixedBugForm" >
+        UPDATE form set status = 1, fixed_time = #{fixedTime} WHERE id =#{id};
+    </update>
+
+    <update id="refixBugForm">
+        UPDATE form set status = 3, refix_time = #{refixTime} WHERE id =#{id};
+    </update>
+
+    <update id="regressBugForm">
+        UPDATE form set status = 2, regress_time = #{regressTime} WHERE id =#{id};
+    </update>
+
+    <update id="closeBugForm">
+        UPDATE form set status = 4, close_time = #{closeTime} WHERE id =#{id};
+    </update>
+    
+    <select id="selectBugForm" resultMap="bugFormEditResultMap">
+        SELECT b.alias,a.title,a.description,a.attachment,a.assigner,a.priority,a.status
+        from form a LEFT JOIN project b on a.project_id=b.id WHERE a.id=#{id};
+    </select>
+
+    <update id="updateBugForm">
+        UPDATE form
+        <set>
+            <if test="projectId != null">project_id=#{projectId},</if>
+            <if test="title != null">title=#{title},</if>
+            <if test="description != null">description=#{description},</if>
+            <if test="assigner != null">assigner=#{assigner},</if>
+            <if test="priority != null">priority=#{priority}</if>
+        </set>
+          WHERE id=#{id};
+    </update>
+    <select id="selectAttachment" resultMap="string">
+        SELECT attachment FROM form WHERE id = #{id};
+    </select>
+    <update id="updateAttachment">
+        UPDATE form SET attachment=#{attachment} WHERE id=#{id}
+    </update>
+    
+    <select id="formAmount" resultMap="int">
+        SELECT count(*) FROM form;
+    </select>
+    
+    <select id="queryFormList" resultMap="bugFormEditResultMap">
+        SELECT a.id,b.alias,a.title,a.description,a.attachment,a.assigner,a.priority FROM form a LEFT JOIN project b ON a.project_id=b.id LIMIT #{pageStart},10;
+    </select>
+    
+    <select id="myFormTask" resultMap="hashMap">
+        SELECT a.id,b.alias,a.title,a.status from form a LEFT JOIN project b ON a.project_id=b.id
+        WHERE a.assigner=#{assigner} ORDER BY a.update_time  LIMIT #{pageStart},10;
+    </select>
+    <select id="myFormTaskAmount" resultMap="int">
+       SELECT count(*) from form a LEFT JOIN project b ON a.project_id=b.id
+       WHERE a.assigner=#{assigner};
+    </select>
+    <select id="myCreateBug" resultMap="hashMap">
+        SELECT a.id,b.alias,a.title,a.status from form a LEFT JOIN project b ON a.project_id=b.id
+        WHERE a.creator=#{creator} ORDER BY a.update_time LIMIT #{pageStart},10;
+    </select>
+
+    <select id="queryCreatorById" resultMap="string">
+        SELECT creator FROM form WHERE id=#{id};
+    </select>
+
+</mapper>

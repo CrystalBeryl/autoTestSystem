@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="com.beryl.mapper.UserMapper">
+
+ <resultMap id="userResultMap" type="com.beryl.model.User">
+  <id property="id" column="id" />
+  <result property="roleId" column="role_id"/>
+  <result property="username" column="username"/>
+  <result property="password" column="password"/>
+  <result property="createTime" column="create_time"/>
+  <result property="updateTime" column="update_time"/>
+ </resultMap>
+
+ <resultMap id="int" type="java.lang.Integer">
+ </resultMap>
+ <resultMap id="string" type="java.lang.String">
+ </resultMap>
+ 
+ <resultMap id="hashMap" type="java.util.HashMap">
+ </resultMap>
+
+ <select id="getUser"  resultMap="userResultMap">
+SELECT username, password from reg_user WHERE username= #{username};
+</select>
+<select id="getAllUsers"  resultMap="string">
+  SELECT username from reg_user;
+</select>
+
+ <insert id="regUser">
+INSERT INTO reg_user (username, password, create_time)
+VALUES (#{username}, #{password}, #{createTime}) ;
+ </insert>
+
+ <select id="checkUserExist" resultMap="int">
+SELECT  count(*) from reg_user where username = #{username};
+ </select>
+ 
+ <select id="queryRoleId" resultMap="int">
+  SELECT role_id FROM reg_user WHERE username=#{username};
+ </select>
+
+ <update id="updateUserRole">
+  UPDATE reg_user
+  <set>
+   <if test="roleId != null">role_id=#{roleId}</if>
+  </set>
+  WHERE username=#{username};
+ </update>
+ 
+ <select id="userCounts" resultMap="int">
+  SELECT count(*) FROM reg_user;
+ </select>
+
+ <select id="developerNames" resultMap="string">
+    SELECT a.username from reg_user a WHERE a.role_id=2;
+ </select>
+
+
+</mapper>

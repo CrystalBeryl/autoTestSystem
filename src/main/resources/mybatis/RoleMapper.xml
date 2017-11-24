@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="com.beryl.mapper.RoleMapper">
+
+ <resultMap id="int" type="java.lang.Integer">
+ </resultMap>
+ <resultMap id="string" type="java.lang.String">
+ </resultMap>
+ <resultMap id="hashMap" type="java.util.HashMap">
+ </resultMap>
+
+ <resultMap id="roleResultMap" type="com.beryl.model.Role">
+  <id property="id" column="id" />
+  <result property="roleId" column="role_id"/>
+  <result property="roleName" column="role_name"/>
+ </resultMap>
+
+ <resultMap id="roleUserResultMap" type="hashMap">
+  <id property="roleId" column="role_id" javaType="int"/>
+  <result property="roleName" column="role_name"/>
+  <association property="reg_user" javaType="hashMap" >
+   <id property="roleId" column="role_id"></id>
+   <result property="username" column="username"></result>
+  </association>
+ </resultMap>
+
+
+<select id="roleNameList"  resultMap="string">
+  SELECT role_name FROM role;
+</select>
+
+ <select id="selectRoleId" resultMap="int">
+  SELECT role_id from role WHERE role_name=#{roleName}
+ </select>
+
+<select id="roleUserList" resultMap="roleUserResultMap">
+  SELECT a.username,b.role_name FROM reg_user a INNER JOIN role b on a.role_id=b.role_id;
+</select>
+
+<select id="rolePage" resultMap="roleUserResultMap">
+SELECT a.id,a.username,b.role_name FROM reg_user a INNER JOIN role b
+on a.role_id=b.role_id ORDER BY a.update_time DESC LIMIT #{pageStart},10;
+</select>
+</mapper>
